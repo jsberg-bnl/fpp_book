@@ -135,19 +135,16 @@ ifeq ($(FC),gfortran)
 ifeq ($(origin FC),file)
 FCVER  := $(shell $(FC) -dumpversion)
 FCVERL := $(subst ., ,$(FCVER))
-FCVER1 := $(findstring $(word 1,$(FCVERL)),"456789")
-FCVER2 := 0
-  ifeq ($(FCVER1),4)
-  FCVER2 := $(findstring $(word 2,$(FCVERL)),"456789")
-  endif
-ifeq ($(and $(FCVER1),$(FCVER2)),)
-ifeq ($(findstring lxplus,$(HOST)),lxplus)
+FCVER1 := $(word 1,$(FCVERL))
+FCVER2 := $(word 1,$(FCVERL))
+ifeq ($(shell [ $(FCVER1) -gt 4 ] || ( [ $(FCVER1) -eq 4 ] && [ $(FCVER2) -ge 4 ] ) && echo y),y)
+ifneq ($(and $(findstring lxplus,$(HOST)),$(findstring 4:4,$(FCVER1):$(FCVER2))),)
 $(warning PTC requires gfortran >= 4.4 ($(FCVER) detected), FC set to gfortran44)
 FC     := gfortran44
 FCNAME := gfortran
+endif # lxplus
 else
 $(error PTC requires gfortran >= 4.4 ($(if $(FCVER),$(FCVER),none) detected))
-endif # lxplus
 endif # version
 endif # origin
 endif # gfortran
